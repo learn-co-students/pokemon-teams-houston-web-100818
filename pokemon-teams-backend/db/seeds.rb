@@ -7,7 +7,7 @@
 #   Character.create(name: 'Luke', movie: movies.first)
 require 'faker'
 require 'securerandom'
-
+require 'rest-client'
 
 Trainer.delete_all
 Pokemon.delete_all
@@ -35,6 +35,12 @@ trainer_collection.each do |trainer|
   (1..team_size).each do |poke|
     name = Faker::Name.first_name
     species = Faker::Pokemon.name
-    Pokemon.create(nickname: name, species: species, trainer_id: trainer.id)
+    puts "https://pokeapi.co/api/v2/pokemon-species/#{species.downcase}"
+    response = JSON.parse(RestClient.get("https://pokeapi.co/api/v2/pokemon-species/#{species.downcase}"))
+    id = response["id"]
+    sprite_front = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{id}.png"
+    Pokemon.create(nickname: name, species: species, trainer_id: trainer.id, sprite_front: sprite_front)
   end
+
+
 end

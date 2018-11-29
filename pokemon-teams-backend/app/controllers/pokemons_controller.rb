@@ -17,6 +17,10 @@ class PokemonsController < ApplicationController
 
         if pokemon_params[:species].nil?
           default[:species] = Faker::Pokemon.name
+          response = JSON.parse(RestClient.get("https://pokeapi.co/api/v2/pokemon-species/#{species.downcase}"))
+          id = response["id"]
+          sprite_front = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{id}.png"
+          default[:sprite_front] = sprite_front
         end
 
         @pokemon = Pokemon.create(pokemon_params.merge(default))
@@ -41,6 +45,6 @@ class PokemonsController < ApplicationController
 
   private
   def pokemon_params
-    params.require(:pokemon).permit(:nickname, :species, :trainer_id)
+    params.require(:pokemon).permit(:nickname, :species, :trainer_id, :sprite_front)
   end
 end
