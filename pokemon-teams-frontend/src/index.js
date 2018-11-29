@@ -14,11 +14,11 @@ const render = function () {
     })
     .then(function(trainers){
         // console.log(trainers)
-        renderTrainers(trainers)
+        renderTrainerCards(trainers)
     })
 }
 
-const renderTrainers = function(trainers) {
+const renderTrainerCards = function(trainers) {
     main.innerHTML = ''
     trainers.forEach(function(trainer){
         const trainerDiv = document.createElement('div')
@@ -36,7 +36,6 @@ const renderTrainers = function(trainers) {
         addPokemonButton.addEventListener('click', function(){
             selectedTrainer = trainer
             console.log(selectedTrainer.pokemons)
-            createPokemon()
             if (selectedTrainer.pokemons.length < 7){
                 createPokemon()
             }
