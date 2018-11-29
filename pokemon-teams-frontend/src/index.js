@@ -15,6 +15,7 @@ fetch(TRAINERS_URL)
 })
 
 const render = function() {
+  main.innerHTML = ''
   trainers.forEach(function(trainer) {
     renderTrainer(trainer)
   })
@@ -35,7 +36,11 @@ const renderAddButton = function(trainer, trainerCard) {
   addButton.dataset.trainerId = trainer.id
   addButton.innerText = 'Add Pokemon'
   addButton.addEventListener('click', function() {
-    addPokemon(trainer)
+    if (trainer.pokemons.length < 6) {
+      addPokemon(trainer)
+    } else {
+      alert('Maximum number of pokemon. Must release one first.')
+    }
   })
 }
 
@@ -63,26 +68,28 @@ const renderReleaseButton = function(trainer, pokemon, listItem) {
 }
 
 const addPokemon = function(trainer) {
-  let newPokemon
-  fetch((POKEMONS_URL), {
+  fetch(POKEMONS_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: {
-      trainer_id: trainer.id
-    }
+    body: JSON.stringify({ trainer_id: trainer.id })
   }).then(function(response) {
-    response.json()
-  }).then(function(result) {
-    newPokemon = result
+    return response.json()
+  }).then(function(newPokemon) {
+    trainer.pokemons.push(newPokemon)
+    alert(`${trainer.name} added ${newPokemon.species}!`)
+    render()
   })
-  console.log(newPokemon)
-  trainer.pokemons.push(newPokemon)
-  alert(`${trainer.name} added ${newPokemon.species}!`)
-  render()
 }
 
-const releasePokemon = function(trainer, pokemon) {
-  alert(`${trainer.name} released ${pokemon.species}!`)
+const releasePokemon = function(trainer, pokemonToDelete) {
+  fetch(`${POKEMONS_URL}/${pokemonToDelete.id}`, { method: 'DELETE' })
+
+  trainer.pokemons = trainer.pokemons.filter(function(pokemon) {
+    return pokemon !== pokemonToDelete
+  })
+
+  alert(`${trainer.name} released ${pokemonToDelete.species}!`)
+  render()
 }
