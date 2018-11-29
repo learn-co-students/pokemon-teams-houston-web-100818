@@ -24,12 +24,16 @@ function render() {
         const trainerName = document.createElement('p')
         trainerName.innerText = trainer.name
         
+        const errorMessage = document.createElement('small')
+        errorMessage.innerText = ` ${trainer.errorMessage || ''}`
+        errorMessage.style.color = 'red'
+
         const pokeButton = document.createElement('button')
         pokeButton.dataset.trainerId = trainer.id
         pokeButton.innerText = 'Add Pokemon'
         pokeButton.addEventListener('click', ()=>{
             
-                addPokemon(trainer.id)
+                addPokemon(trainer)
             })
             
         const pokeList = document.createElement('ul')
@@ -37,7 +41,7 @@ function render() {
             pokeList.append(renderPokeItem(pokemon))
         })
         
-        pokeCard.append(trainerName, pokeButton, pokeList)
+        pokeCard.append(trainerName, pokeButton, errorMessage, pokeList)
         pokePage.append(pokeCard)
     })
 }
@@ -61,7 +65,8 @@ function releasePokemon(pokeId) {
     }).then ( fetchTrainers )
 }
 
-function addPokemon(trainID) {
+function addPokemon(trainer) {
+    const trainID = trainer.id
     fetch(POKEMONS_URL, {
         method: "POST",
         headers:
@@ -69,11 +74,21 @@ function addPokemon(trainID) {
             'Content-Type': 'application/json'
         },
 
-        body:
-        {
+        body: JSON.stringify({
             trainer_id: trainID
+        })
+    }).then ((response)=>{
+        if (response.status == 403){
+            console.log(response)
+            response.json()
+                .then( message => {
+                    trainer.errorMessage = message.error
+                    render()
+                })
+        } else {
+            fetchTrainers()
         }
-    }).then (fetchTrainers)
+    })
 }
 
 fetchTrainers();
